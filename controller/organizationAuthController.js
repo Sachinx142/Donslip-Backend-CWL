@@ -1,8 +1,8 @@
-const authModel = require("../model/authModel");
+const OrganizationModel = require("../model/organizationModel");
 const { generateToken } = require("../utils/jwt");
 // const {generateOtp } = require("../utils/otp")
 
-const loginAuth = async (req, res) => {
+const Orglogin = async (req, res) => {
   try {
     const { contact, type } = req.body;
 
@@ -10,19 +10,19 @@ const loginAuth = async (req, res) => {
       return res.json({ message: "Email and Phone are required", status: 0 });
     }
 
-    const contactType = type === 1 ? 'email' : type === 2 ? 'phone' : null;
+    const contactType = type === 1 ? "email" : type === 2 ? "phone" : null;
 
     if (!contactType) {
       return res.json({ message: "Invalid type value", status: 0 });
     }
 
-    const auth = await authModel.findOne({ [contactType]: contact });
+    const auth = await OrganizationModel.findOne({ [contactType]: contact });
 
     if (!auth) {
       return res.json({ message: "User not found", status: 0 });
     }
 
-    const otp = 1234
+    const otp = 1234;
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
     auth.otp = otp;
@@ -40,15 +40,17 @@ const loginAuth = async (req, res) => {
         email: auth.email,
         phone: auth.phone,
       },
-      status:1
+      status: 1,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error", error: error.message, status: 0 });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message, status: 0 });
   }
 };
 
-const verifyOtp = async (req, res) => {
+const OrgverifyOtp = async (req, res) => {
   try {
     const { contact, otp } = req.body;
 
@@ -58,13 +60,13 @@ const verifyOtp = async (req, res) => {
 
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
     const isPhone = /^\d{10}$/.test(contact);
-    const contactType = isEmail ? 'email' : isPhone ? 'phone' : null;
+    const contactType = isEmail ? "email" : isPhone ? "phone" : null;
 
     if (!contactType) {
       return res.json({ message: "Invalid contact format", status: 0 });
     }
 
-    const user = await authModel.findOne({ [contactType]: contact });
+    const user = await OrganizationModel.findOne({ [contactType]: contact });
 
     if (!user) {
       return res.json({ message: "User not found", status: 0 });
@@ -85,8 +87,7 @@ const verifyOtp = async (req, res) => {
       return res.json({ message: "OTP expired", status: 0 });
     }
 
-     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
     user.otp = otp;
     user.otpExpiry = otpExpiry;
@@ -104,15 +105,17 @@ const verifyOtp = async (req, res) => {
         email: user.email,
         phone: user.phone,
       },
-      status:1
+      status: 1,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error", error: error.message, status: 0 });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message, status: 0 });
   }
 };
 
-const registerAuth = async (req, res) => {
+const OrgRegister = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
 
@@ -127,32 +130,80 @@ const registerAuth = async (req, res) => {
       return res.json({ message: "Invalid phone number format", status: 0 });
     }
 
-    
-    const isExists = await authModel.findOne({ $or: [{ email }, { phone }] });
+    const isExists = await OrganizationModel.findOne({
+      $or: [{ email }, { phone }],
+    });
 
     if (isExists) {
       return res.json({ message: "User already registered", status: 0 });
     }
 
-    const newUser = await authModel.create({ name, email, phone });
+    
+    const otp = 1234;
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+  
+    const newUser = await OrganizationModel.create({ name, email, phone,otp,otpExpiry });
+      newUser.otp = otp;
+    newUser.otpExpiry = otpExpiry;
+
+    await newUser.save();
 
     return res.status(201).json({
       message: "Register successfully",
       status: 1,
-      data: newUser,
+      data: {
+        userId: newUser._id,
+        otp,
+      },
     });
-
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error", error: error.message, status: 0 });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message, status: 0 });
   }
 };
 
+  const OrgRegisterVerifyOtp = async (req, res) => {
+    try {
+      const { userId, otp } = req.body;
+
+      if (!userId || !otp) {
+        return res.json({ status: 0, message: "Organization Not found" });
+      }
+
+      const user = await OrganizationModel.findById(userId);
+      
+
+      if (!user) {
+        return res.json({ message: "Organization not found", status: 0 });
+      }
+
+      if (new Date() > user.otpExpiry) {
+        return res.json({ message: "OTP expired", status: 0 });
+      }
+
+      if(user.otp !== otp){
+        return res.json({ message: "Invalid OTP", status: 0 });
+      }
+
+      user.otp = otp;
+      user.otpExpiry = undefined;
+      await user.save()
+
+      
+      return res.status(200).json({ message: "OTP verified successfully", status: 1 });
 
 
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Server error", error: error.message, status: 0 });
+    }
+  };
 
 module.exports = {
-  loginAuth,
-  registerAuth,
-  verifyOtp,
+  Orglogin,
+  OrgverifyOtp,
+  OrgRegister,
+  OrgRegisterVerifyOtp
 };

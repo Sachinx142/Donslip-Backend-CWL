@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createRegistration } = require("../controller/OrgRegisterController");
+const { createRegistration } = require("../controller/orgRegisterController");
 const upload = require("../middleware/fileUpload");
 
 

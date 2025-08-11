@@ -2,6 +2,31 @@ const mongoose = require("mongoose");
 
 const registerSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+      default: null,
+    },
+    email: {
+      type: String,
+      default: null,
+      unique: true,
+    },
+    phone: {
+      type: String,
+      default: null,
+      unique: true,
+    },
+    lastLoginMethod: {
+      type: String,
+      enum: ["email", "phone"],
+      default: null,
+    },
+    otp: { type: Number },
+    otpExpiry: { type: Date },
+    status: {
+      type: Number,
+      default: null,
+    },
     registerImage: { type: String, default: null },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -33,8 +58,7 @@ const registerSchema = new mongoose.Schema(
     pincode: { type: String, default: "" },
     fullAddress: { type: String, default: "" },
 
-    panNo: { type: String, default: "" },          
-    registrationNo: { type: String, default: "" },  
+    panNo: { type: String, default: "" },
 
     //Upload Licence & Approvals
     licenceApprovalId: {
@@ -42,11 +66,26 @@ const registerSchema = new mongoose.Schema(
       ref: "uploadedLicenseModel",
       default: null,
     },
+    // 1 for Register and 0 for Unregister
+    organiZationType:{
+     type:Number,
+     default:0
+    },
+    // Count Form Steps
+    formCounter:{
+      type:Number,
+      default:0
+    },
+    // Type 1 for admin and type 2 for admin,agent
+    role:{
+       type:Number,
+       default:0
+    },
     status: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
-const registerModel = mongoose.model("registerModel",registerSchema)
+const registerModel = mongoose.model("registerModel", registerSchema);
 
-module.exports = registerModel
+module.exports = registerModel;
