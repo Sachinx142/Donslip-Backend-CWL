@@ -33,19 +33,15 @@ const registerSchema = new mongoose.Schema(
     pincode: { type: String, default: "" },
     fullAddress: { type: String, default: "" },
 
+    panNo: { type: String, default: "" },          
+    registrationNo: { type: String, default: "" },  
+
     //Upload Licence & Approvals
     licenceApprovalId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "licenceApprovalsModel",
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "uploadedLicenseModel",
       default: null,
     },
-    companyActRegNo: { type: String, default: "" },
-    panNo: { type: String, default: "" },
-    licenceName: { type: String, default: "" },
-    companyActFile: { type: String, default: "" },
-    panFile: { type: String, default: "" },
-    licenceFile: { type: String, default: "" },
-
     status: { type: Number, default: 0 },
   },
   { timestamps: true }

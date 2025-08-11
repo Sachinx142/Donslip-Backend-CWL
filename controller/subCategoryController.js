@@ -36,7 +36,7 @@ const getSubCategorybyId = async (req, res) => {
     const data = await subCategoryModel.findById(id);
 
     if (!data) {
-      return res.status(404).json({
+      return res.json({
         message: "SubCategory not found.",
         status: 0,
       });
@@ -150,7 +150,6 @@ const deleteSubCategory = async (req, res) => {
 
       if(!id){
          return res
-        .status(400)
         .json({ message: "SubCategory Id is required", status: 0 });
     }
 
@@ -159,7 +158,6 @@ const deleteSubCategory = async (req, res) => {
 
     if (!data) {
       res
-        .status(400)
         .json({ message: "Unable to update category data", status: 0 });
     }
 

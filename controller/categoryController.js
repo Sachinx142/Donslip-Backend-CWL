@@ -178,7 +178,7 @@ const getAllActiveCategory = async (req, res) => {
     const data = await categoryModel.find({ status: 1 });
 
     if (!data || data.length === 0) {
-      return res.status(400).json({
+      return res.json({
         message: "Unable to get category data",
         status: 0,
       });

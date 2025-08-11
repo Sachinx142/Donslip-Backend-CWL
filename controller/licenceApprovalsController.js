@@ -5,7 +5,7 @@ const getAllLicence =  async (req, res) => {
     const data = await licenceApprovalsModel.find();
 
     if (!data || data.length === 0) {
-      return res.status(400).json({
+      return res.json({
         message: "Unable to get licence data",
         status: 0,
       });
@@ -31,7 +31,7 @@ const getAllLicenceByID = async (req, res) => {
     const {id} = req.body;
 
     if (!id) {
-      return res.status(400).json({
+      return res.json({
         message: "Unable to get licence data",
         status: 0,
       });
@@ -40,7 +40,7 @@ const getAllLicenceByID = async (req, res) => {
     const data = await licenceApprovalsModel.findById(id)
     
     if (!data) {
-      return res.status(404).json({
+      return res.json({
         message: "Licence not found.",
         status: 0,
       });
@@ -66,7 +66,7 @@ const createLicence = async (req, res) => {
     const { lincenceName } = req.body;
 
     if (!lincenceName) {
-      return res.status(400).json({
+      return res.json({
         message: "Licence name is required",
         status: 0,
       });
@@ -75,7 +75,7 @@ const createLicence = async (req, res) => {
     const isExists = await licenceApprovalsModel.findOne({lincenceName})
 
     if(isExists){
-        return res.status(400).json({
+        return res.json({
         message: "Licence Already Exits",
         status: 0,
       });
@@ -106,7 +106,7 @@ const updateLicence = async (req, res) => {
     const { id, lincenceName } = req.body;
 
     if (!id || !lincenceName) {
-      return res.status(400).json({
+      return res.json({
         message: "Licence ID and Licence Name is Required",
         status: 0,
       });
@@ -116,7 +116,7 @@ const updateLicence = async (req, res) => {
     const data = await licenceApprovalsModel.findByIdAndUpdate({ _id: id }, { lincenceName });
 
     if (!data) {
-      return res.status(400).json({
+      return res.json({
         message: "Unable to update licence data",
         status: 0,
       });
@@ -139,7 +139,6 @@ const deleteLicence = async (req, res) => {
 
     if(!id){
          return res
-        .status(400)
         .json({ message: "Licence Id is required", status: 0 });
     }
 
@@ -147,7 +146,6 @@ const deleteLicence = async (req, res) => {
 
     if (!data) {
       res
-        .status(400)
         .json({ message: "Unable to update licence data", status: 0 });
     }
 
@@ -172,7 +170,7 @@ const changeStatus = async (req, res) => {
     );
 
     if (!data) {
-      res.status(400).json({ message: "Unable to Change Status", status: 0 });
+      res.json({ message: "Unable to Change Status", status: 0 });
     }
 
     return res
@@ -189,7 +187,7 @@ const getAllActiveLicence = async (req,res) => {
       const data = await licenceApprovalsModel.find({status:1})
 
       if(!data || data.length === 0){
-        return res.status(400).json({
+        return res.json({
           message:"Unable to get licence data",
           status:0
         })

@@ -6,9 +6,7 @@ const upload = require("../middleware/fileUpload");
 
 const multiUpload = upload.fields([
   { name: "registerImage", maxCount: 1 },
-  { name: "companyActFile", maxCount: 1 },
-  { name: "panFile", maxCount: 1 },
-  { name: "licenceFile", maxCount: 1 },
+  { name: "licenceFile", maxCount: 10 },
 ]);
 
 router.post("/createRegistration", multiUpload, createRegistration);

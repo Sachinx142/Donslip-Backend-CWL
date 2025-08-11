@@ -7,19 +7,19 @@ const loginAuth = async (req, res) => {
     const { contact, type } = req.body;
 
     if (!contact || !type) {
-      return res.status(400).json({ message: "Email and Phone are required", status: 0 });
+      return res.json({ message: "Email and Phone are required", status: 0 });
     }
 
     const contactType = type === 1 ? 'email' : type === 2 ? 'phone' : null;
 
     if (!contactType) {
-      return res.status(400).json({ message: "Invalid type value", status: 0 });
+      return res.json({ message: "Invalid type value", status: 0 });
     }
 
     const auth = await authModel.findOne({ [contactType]: contact });
 
     if (!auth) {
-      return res.status(404).json({ message: "User not found", status: 0 });
+      return res.json({ message: "User not found", status: 0 });
     }
 
     const otp = 1234
@@ -53,7 +53,7 @@ const verifyOtp = async (req, res) => {
     const { contact, otp } = req.body;
 
     if (!contact || !otp) {
-      return res.status(400).json({ message: "Contact and OTP are required", status: 0 });
+      return res.json({ message: "Contact and OTP are required", status: 0 });
     }
 
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
@@ -61,28 +61,28 @@ const verifyOtp = async (req, res) => {
     const contactType = isEmail ? 'email' : isPhone ? 'phone' : null;
 
     if (!contactType) {
-      return res.status(400).json({ message: "Invalid contact format", status: 0 });
+      return res.json({ message: "Invalid contact format", status: 0 });
     }
 
     const user = await authModel.findOne({ [contactType]: contact });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found", status: 0 });
+      return res.json({ message: "User not found", status: 0 });
     }
 
     if (user.lastLoginMethod !== contactType) {
-      return res.status(400).json({
+      return res.json({
         message: `OTP must be verified using the same method as login (${user.lastLoginMethod})`,
         status: 0,
       });
     }
 
     if (user.otp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP", status: 0 });
+      return res.json({ message: "Invalid OTP", status: 0 });
     }
 
     if (user.otpExpiry < new Date()) {
-      return res.status(400).json({ message: "OTP expired", status: 0 });
+      return res.json({ message: "OTP expired", status: 0 });
     }
 
      const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
@@ -117,21 +117,21 @@ const registerAuth = async (req, res) => {
     const { name, email, phone } = req.body;
 
     if (!name || !email || !phone) {
-      return res.status(400).json({ message: "All fields are required", status: 0 });
+      return res.json({ message: "All fields are required", status: 0 });
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ message: "Invalid email format", status: 0 });
+      return res.json({ message: "Invalid email format", status: 0 });
     }
     if (!/^\d{10}$/.test(phone)) {
-      return res.status(400).json({ message: "Invalid phone number format", status: 0 });
+      return res.json({ message: "Invalid phone number format", status: 0 });
     }
 
     
     const isExists = await authModel.findOne({ $or: [{ email }, { phone }] });
 
     if (isExists) {
-      return res.status(400).json({ message: "User already registered", status: 0 });
+      return res.json({ message: "User already registered", status: 0 });
     }
 
     const newUser = await authModel.create({ name, email, phone });
