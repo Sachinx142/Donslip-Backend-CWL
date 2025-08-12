@@ -1,4 +1,4 @@
-const OrganizationModel = require("../model/organizationModel");
+const organizationModel = require("../model/organizationModel");
 const { generateToken } = require("../utils/jwt");
 // const {generateOtp } = require("../utils/otp")
 
@@ -16,31 +16,28 @@ const Orglogin = async (req, res) => {
       return res.json({ message: "Invalid type value", status: 0 });
     }
 
-    const auth = await OrganizationModel.findOne({ [contactType]: contact });
+    const user = await organizationModel.findOne({ [contactType]: contact });
 
-    if (!auth) {
+    if (!user) {
       return res.json({ message: "User not found", status: 0 });
     }
 
     const otp = 1234;
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
-    auth.otp = otp;
-    auth.otpExpiry = otpExpiry;
-    auth.lastLoginMethod = contactType;
-    await auth.save();
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    user.lastLoginMethod = contactType;
+    await user.save();
 
     console.log(`Send OTP ${otp} to ${contactType}: ${contact}`);
 
     return res.status(200).json({
       message: "OTP sent successfully",
-      user: {
-        id: auth._id,
-        name: auth.name,
-        email: auth.email,
-        phone: auth.phone,
-      },
       status: 1,
+      data:{
+        id:user._id
+      }
     });
   } catch (error) {
     console.error(error);
@@ -66,7 +63,7 @@ const OrgverifyOtp = async (req, res) => {
       return res.json({ message: "Invalid contact format", status: 0 });
     }
 
-    const user = await OrganizationModel.findOne({ [contactType]: contact });
+    const user = await organizationModel.findOne({ [contactType]: contact });
 
     if (!user) {
       return res.json({ message: "User not found", status: 0 });
@@ -99,11 +96,10 @@ const OrgverifyOtp = async (req, res) => {
     return res.status(200).json({
       message: "OTP verified, login successful",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
+      data: {
+        id:user._id,
+        role: user.role,
+        formCounter: user.formCounter,
       },
       status: 1,
     });
@@ -117,7 +113,7 @@ const OrgverifyOtp = async (req, res) => {
 
 const OrgRegister = async (req, res) => {
   try {
-    const { name, email, phone} = req.body;
+    const { name, email, phone } = req.body;
 
     if (!name || !email || !phone) {
       return res.json({ message: "All fields are required", status: 0 });
@@ -130,35 +126,41 @@ const OrgRegister = async (req, res) => {
       return res.json({ message: "Invalid phone number format", status: 0 });
     }
 
-    const isExists = await OrganizationModel.findOne({
+    const isExists = await organizationModel.findOne({
       $or: [{ email }, { phone }],
     });
 
-    if (isExists) {
-      return res.json({ message: "User already registered", status: 0 });
-    }
+   
+if (isExists) {
+  if (isExists.email === email) {
+    return res.json({ message: "Email already registered", status: 0 });
+  }
+  if (isExists.phone === phone) {
+    return res.json({ message: "Phone number already registered", status: 0 });
+  }
+  return res.json({ message: "User already registered", status: 0 });
+}
 
     const otp = 1234;
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
-    const newUser = await OrganizationModel.create({
+    const user = await organizationModel.create({
       name,
       email,
       phone,
       otp,
       otpExpiry,
     });
-    newUser.otp = otp;
-    newUser.otpExpiry = otpExpiry;
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
 
-    await newUser.save();
+    await user.save();
 
     return res.status(201).json({
       message: "Register successfully",
       status: 1,
       data: {
-        userId: newUser._id,
-        otp,
+        id: user._id,
       },
     });
   } catch (error) {
@@ -171,13 +173,13 @@ const OrgRegister = async (req, res) => {
 
 const OrgRegisterVerifyOtp = async (req, res) => {
   try {
-    const { userId, otp } = req.body;
+    const { id, otp } = req.body;
 
-    if (!userId || !otp) {
+    if (!id || !otp) {
       return res.json({ status: 0, message: "Organization Not found" });
     }
 
-    const user = await OrganizationModel.findById(userId);
+    const user = await organizationModel.findById(id);
 
     if (!user) {
       return res.json({ message: "Organization not found", status: 0 });
@@ -191,13 +193,19 @@ const OrgRegisterVerifyOtp = async (req, res) => {
       return res.json({ message: "Invalid OTP", status: 0 });
     }
 
-    user.otp = otp;
+    user.otp = undefined;
     user.otpExpiry = undefined;
     await user.save();
 
-    return res
-      .status(200)
-      .json({ message: "OTP verified successfully", status: 1 });
+    return res.status(200).json({
+      message: "OTP verified successfully",
+      status: 1,
+      data: {
+        id:user._id,
+        formCounter: user.formCounter,
+        role: user.role,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res

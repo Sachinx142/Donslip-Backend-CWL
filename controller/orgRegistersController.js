@@ -149,6 +149,7 @@ const updateRegistration2 = async (req, res) => {
     if (!email?.trim()) return res.json({ status: 0, message: "Email is required" });
     if (!phone?.trim()) return res.json({ status: 0, message: "Phone is required" });
     if (!designation?.trim()) return res.json({ status: 0, message: "Designation is required" });
+    
 
 
     const organization = await organizationModel.findById(id)
@@ -210,24 +211,20 @@ const updateRegistration3 = async (req, res) => {
       accountType
     } = req.body;
 
-    // 1. Validation
     if (!id) return res.json({ status: 0, message: "Organization ID is required" });
     if (!accountHolderName?.trim()) return res.json({ status: 0, message: "Account holder name is required" });
     if (!accountNumber?.trim()) return res.json({ status: 0, message: "Account number is required" });
     if (!ifsc?.trim()) return res.json({ status: 0, message: "IFSC code is required" });
     if (!bankName?.trim()) return res.json({ status: 0, message: "Bank name is required" });
     if (!address?.trim()) return res.json({ status: 0, message: "Address is required" });
-    if (![0, 1].includes(Number(accountType))) {
+    if (!accountType) {
       return res.json({ status: 0, message: "Invalid account type (0 for Normal A/C, 1 for FCRA A/C)" });
     }
-
 
     const organization = await organizationModel.findById(id);
     if (!organization) return res.json({ status: 0, message: "Organization ID not found" });
 
-
     const accountTypeLabel = accountType === 0 ? "Normal A/C" : "FCRA A/C";
-
 
     const newAccount = await accountModel.create({
       accountHolderName,

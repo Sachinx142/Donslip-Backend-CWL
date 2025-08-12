@@ -8,12 +8,10 @@ const managementSchema = new mongoose.Schema({
   email: {
     type: String,
     default:null,
-    unique: true,
   },
   phone: {
     type: String,
     default:null,
-    unique: true,
   },
   designation: {
     type: String,

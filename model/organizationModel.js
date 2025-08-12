@@ -89,12 +89,11 @@ const organizationSchema = new mongoose.Schema(
     // Count Form Steps
     formCounter: {
       type: Number,
-      default: 0,
+      default: 1,
     },
-    // Type 1 for admin and type 2 for admin,agent
     role: {
-      type: Number,
-      default: 0,
+      type: String,
+      default: "Organization",
     },
     status: { type: Number, default: 0 },
   },
