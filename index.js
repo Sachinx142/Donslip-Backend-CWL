@@ -12,10 +12,11 @@ const orgAuthRoutes = require("./routes/orgAuthRoutes");
 
 dotenv.config();
 
+const PORT = process.env.PORT || 8000;
 require("./config/connect");
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
@@ -31,7 +32,6 @@ app.use("/api/licenceApprovals", licenceApprovalsRoutes);
 app.use("/api/orgRegisteration", orgRegisterRoutes);
 app.use("/api/organizationAuth", orgAuthRoutes);
 
-const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server is Running at ${PORT}`);
 });
