@@ -104,7 +104,7 @@ const createRegistration1 = async (req, res) => {
       lincenDocs = await uploadedLincenModel.insertMany(licenceData);
     }
 
-    const newRegister = await registerModel.create({
+    const newRegister = await organizationModel.create({
       categoryId,
       subCategoryId,
       religionId,
