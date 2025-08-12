@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const registerSchema = new mongoose.Schema(
+const organizationSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -101,6 +101,6 @@ const registerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const registerModel = mongoose.model("registerModel", registerSchema);
+const organizationModel = mongoose.model("organizationModel", organizationSchema);
 
-module.exports = registerModel;
+module.exports = organizationModel;
