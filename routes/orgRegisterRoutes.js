@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createRegistration1,createRegistration2} = require("../controller/orgRegisterController");
+const { createRegistration1,createRegistration2} = require("../controller/orgRegistersController");
 const upload = require("../middleware/fileUpload");
 
 
