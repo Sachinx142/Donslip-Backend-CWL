@@ -1,7 +1,9 @@
-const OrganizationModel = require("../model/organizationModel");
+const organizationModel = require("../model/organizationModel");
 const uploadedLincenModel = require("../model/uploadedLincenModel");
+const manageMentModel = require("../model/manageMentModel");
+ const accountModel = require("../model/bankDetailsModel");
 
-const createRegistration = async (req, res) => {
+const createRegistration1 = async (req, res) => {
   try {
     const {
       categoryId,
@@ -69,7 +71,7 @@ const createRegistration = async (req, res) => {
     }
 
     // Check Existing Register Org
-    const isExisting = await OrganizationModel.findOne({
+    const isExisting = await organizationModel.findOne({
         $or:[
             {registeredName:registeredName},
             {fullAddress:fullAddress}
@@ -122,8 +124,10 @@ const createRegistration = async (req, res) => {
       status: 1,
     });
 
+   
+
     return res
-      .status(200)
+    .status(200)
       .json({
         status: 1,
         message: "Registered successfully",
@@ -136,5 +140,119 @@ const createRegistration = async (req, res) => {
       .json({ status: 0, message: "Internal server error" });
   }
 };
+const createRegistration2 = async (req, res) => {
+  try {
+    const { id, fullname, email, phone, designation, type } = req.body;
 
-module.exports = { createRegistration };
+    if (!id) return res.json({ status: 0, message: "Organization ID is required" });
+    if (!fullname?.trim()) return res.json({ status: 0, message: "Fullname is required" });
+    if (!email?.trim()) return res.json({ status: 0, message: "Email is required" });
+    if (!phone?.trim()) return res.json({ status: 0, message: "Phone is required" });
+    if (!designation?.trim()) return res.json({ status: 0, message: "Designation is required" });
+
+
+    const organization = await organizationModel.findById(id)
+    if (!organization) return res.json({ status: 0, message: "Organization ID not found" });
+
+    // Check for duplicate email/phone only inside this org
+    const existingManagement = await manageMentModel.findOne({
+      _id: { $in: organization.managements },
+      $or: [{ email }, { phone }]
+    });
+
+    if (existingManagement) {
+      return res.json({ status: 0, message: "Email or phone already registered in this organization" });
+    }
+
+
+    if (type === 1) {
+      const headExists = await manageMentModel.exists({
+        _id: { $in: organization.managements },
+        type: 1
+      });
+      if (headExists) {
+        return res.json({ status: 0, message: "Head already exists in this organization" });
+      }
+    }
+
+  
+    const newManagement = await manageMentModel.create({
+      fullname,
+      email,
+      phone,
+      designation,
+      type
+    });
+
+
+    await organizationModel.findByIdAndUpdate(
+      id,
+      { $addToSet: { managements: newManagement._id } }
+    );
+
+    res.json({ status: 1, message: "Management added", data: newManagement });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 0, message: "Internal server error" });
+  }
+};
+
+
+const createRegistration3 = async (req, res) => {
+  try {
+    const {
+      id,
+      accountHolderName,
+      accountNumber,
+      ifsc,
+      bankName,
+      address,
+      accountType
+    } = req.body;
+
+    // 1. Validation
+    if (!id) return res.json({ status: 0, message: "Organization ID is required" });
+    if (!accountHolderName?.trim()) return res.json({ status: 0, message: "Account holder name is required" });
+    if (!accountNumber?.trim()) return res.json({ status: 0, message: "Account number is required" });
+    if (!ifsc?.trim()) return res.json({ status: 0, message: "IFSC code is required" });
+    if (!bankName?.trim()) return res.json({ status: 0, message: "Bank name is required" });
+    if (!address?.trim()) return res.json({ status: 0, message: "Address is required" });
+    if (![0, 1].includes(Number(accountType))) {
+      return res.json({ status: 0, message: "Invalid account type (0 for Normal A/C, 1 for FCRA A/C)" });
+    }
+
+
+    const organization = await organizationModel.findById(id);
+    if (!organization) return res.json({ status: 0, message: "Organization ID not found" });
+
+
+    const accountTypeLabel = accountType === 0 ? "Normal A/C" : "FCRA A/C";
+
+
+    const newAccount = await accountModel.create({
+      accountHolderName,
+      accountNumber,
+      ifsc,
+      bankName,
+      address,
+      accountType,
+      accountTypeLabel
+    });
+
+    await organizationModel.findByIdAndUpdate(id, {
+      $addToSet: { accounts: newAccount._id }
+    });
+
+    res.status(200).json({
+      status: 1,
+      message: "Account added successfully",
+      data: newAccount
+    });
+
+  } catch (err) {
+    console.error("Error in createRegistration3:", err);
+    res.status(500).json({ status: 0, message: "Internal server error" });
+  }
+};
+
+module.exports = { createRegistration1,createRegistration2 };

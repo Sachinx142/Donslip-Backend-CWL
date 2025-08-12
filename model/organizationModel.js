@@ -66,20 +66,35 @@ const registerSchema = new mongoose.Schema(
       ref: "uploadedLicenseModel",
       default: null,
     },
+
+    // Management
+    managements: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "managementModel",
+      default: [],
+    },
+
+    // Bank Details
+    bankDetails: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "accountModel",
+      default: [],
+    },
+
     // 1 for Register and 0 for Unregister
-    organiZationType:{
-     type:Number,
-     default:0
+    organiZationType: {
+      type: Number,
+      default: 0,
     },
     // Count Form Steps
-    formCounter:{
-      type:Number,
-      default:0
+    formCounter: {
+      type: Number,
+      default: 0,
     },
     // Type 1 for admin and type 2 for admin,agent
-    role:{
-       type:Number,
-       default:0
+    role: {
+      type: Number,
+      default: 0,
     },
     status: { type: Number, default: 0 },
   },

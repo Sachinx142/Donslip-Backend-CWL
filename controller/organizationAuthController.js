@@ -117,7 +117,7 @@ const OrgverifyOtp = async (req, res) => {
 
 const OrgRegister = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone} = req.body;
 
     if (!name || !email || !phone) {
       return res.json({ message: "All fields are required", status: 0 });
@@ -138,12 +138,17 @@ const OrgRegister = async (req, res) => {
       return res.json({ message: "User already registered", status: 0 });
     }
 
-    
     const otp = 1234;
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-  
-    const newUser = await OrganizationModel.create({ name, email, phone,otp,otpExpiry });
-      newUser.otp = otp;
+
+    const newUser = await OrganizationModel.create({
+      name,
+      email,
+      phone,
+      otp,
+      otpExpiry,
+    });
+    newUser.otp = otp;
     newUser.otpExpiry = otpExpiry;
 
     await newUser.save();
@@ -164,46 +169,46 @@ const OrgRegister = async (req, res) => {
   }
 };
 
-  const OrgRegisterVerifyOtp = async (req, res) => {
-    try {
-      const { userId, otp } = req.body;
+const OrgRegisterVerifyOtp = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
 
-      if (!userId || !otp) {
-        return res.json({ status: 0, message: "Organization Not found" });
-      }
-
-      const user = await OrganizationModel.findById(userId);
-      
-
-      if (!user) {
-        return res.json({ message: "Organization not found", status: 0 });
-      }
-
-      if (new Date() > user.otpExpiry) {
-        return res.json({ message: "OTP expired", status: 0 });
-      }
-
-      if(user.otp !== otp){
-        return res.json({ message: "Invalid OTP", status: 0 });
-      }
-
-      user.otp = otp;
-      user.otpExpiry = undefined;
-      await user.save()
-
-      
-      return res.status(200).json({ message: "OTP verified successfully", status: 1 });
-
-
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Server error", error: error.message, status: 0 });
+    if (!userId || !otp) {
+      return res.json({ status: 0, message: "Organization Not found" });
     }
-  };
+
+    const user = await OrganizationModel.findById(userId);
+
+    if (!user) {
+      return res.json({ message: "Organization not found", status: 0 });
+    }
+
+    if (new Date() > user.otpExpiry) {
+      return res.json({ message: "OTP expired", status: 0 });
+    }
+
+    if (user.otp !== otp) {
+      return res.json({ message: "Invalid OTP", status: 0 });
+    }
+
+    user.otp = otp;
+    user.otpExpiry = undefined;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ message: "OTP verified successfully", status: 1 });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message, status: 0 });
+  }
+};
 
 module.exports = {
   Orglogin,
   OrgverifyOtp,
   OrgRegister,
-  OrgRegisterVerifyOtp
+  OrgRegisterVerifyOtp,
 };
