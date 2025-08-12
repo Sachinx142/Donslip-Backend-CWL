@@ -19,7 +19,6 @@ const createRegistration1 = async (req, res) => {
       fullAddress,
       panNo,
       registrationNo,
-      uploadRegistrationFile,
     } = req.body;
 
     // Basic validations
@@ -88,7 +87,7 @@ const createRegistration1 = async (req, res) => {
       return res.json({ status: 0, message: "Register image is required" });
 
     let uploadFiles = req.files?.licenceFile || [];
-    if (!uploadRegistrationFile)
+    if (!uploadFiles.length === 0)
       return res.json({
         status: 0,
         message: "uploadRegistrationFile  Image is required",
@@ -119,7 +118,6 @@ const createRegistration1 = async (req, res) => {
       licenceApprovalId: lincenDocs.map((doc) => doc._id),
       panNo,
       registrationNo,
-      uploadRegistrationFile,
       registerImage,
       status: 1,
     });
@@ -140,7 +138,9 @@ const createRegistration1 = async (req, res) => {
       .json({ status: 0, message: "Internal server error" });
   }
 };
-const createRegistration2 = async (req, res) => {
+
+
+const updateRegistration2 = async (req, res) => {
   try {
     const { id, fullname, email, phone, designation, type } = req.body;
 
@@ -198,7 +198,7 @@ const createRegistration2 = async (req, res) => {
 };
 
 
-const createRegistration3 = async (req, res) => {
+const updateRegistration3 = async (req, res) => {
   try {
     const {
       id,
@@ -255,4 +255,4 @@ const createRegistration3 = async (req, res) => {
   }
 };
 
-module.exports = { createRegistration1,createRegistration2 };
+module.exports = { createRegistration1,updateRegistration2,updateRegistration3 };

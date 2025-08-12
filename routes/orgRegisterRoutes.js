@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createRegistration1,createRegistration2} = require("../controller/orgRegistersController");
+const { createRegistration1, updateRegistration2, updateRegistration3} = require("../controller/orgRegistersController");
 const upload = require("../middleware/fileUpload");
 
 
@@ -10,6 +10,7 @@ const multiUpload = upload.fields([
 ]);
 
 router.post("/createRegistration1", multiUpload, createRegistration1);
-router.post("/createRegistration2", createRegistration2);
+router.post("/updateRegistration2", updateRegistration2);
+router.post("/updateRegistration3", updateRegistration3);
 
 module.exports = router;
