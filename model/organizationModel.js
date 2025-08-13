@@ -9,20 +9,18 @@ const organizationSchema = new mongoose.Schema(
     email: {
       type: String,
       default: null,
-      unique: true,
     },
     phone: {
       type: String,
       default: null,
-      unique: true,
     },
     lastLoginMethod: {
       type: String,
       enum: ["email", "phone"],
       default: null,
     },
-    otp: { type: Number },
-    otpExpiry: { type: Date },
+    otp: { type: Number ,default:null},
+    otpExpiry: { type: Date ,default:null},
     status: {
       type: Number,
       default: null,
@@ -81,6 +79,26 @@ const organizationSchema = new mongoose.Schema(
       default: [],
     },
 
+    // Contact Details
+    contactDetails:{
+       type:[mongoose.Schema.Types.ObjectId],
+       ref:"contactModel",
+       default:[]
+    },
+
+    // About 
+    aboutDetails:{
+       type:[mongoose.Schema.Types.ObjectId],
+       ref:"aboutModel",
+       default:[]
+    },
+
+    //OTP Verification
+    otpVefication:{
+      type:Number,
+      default:0
+    },
+    
     // 1 for Register and 0 for Unregister
     organiZationType: {
       type: Number,

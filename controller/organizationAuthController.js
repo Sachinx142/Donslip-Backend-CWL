@@ -35,9 +35,9 @@ const Orglogin = async (req, res) => {
     return res.status(200).json({
       message: "OTP sent successfully",
       status: 1,
-      data:{
-        id:user._id
-      }
+      data: {
+        id: user._id,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -97,7 +97,7 @@ const OrgverifyOtp = async (req, res) => {
       message: "OTP verified, login successful",
       token,
       data: {
-        id:user._id,
+        id: user._id,
         role: user.role,
         formCounter: user.formCounter,
       },
@@ -127,19 +127,21 @@ const OrgRegister = async (req, res) => {
     }
 
     const isExists = await organizationModel.findOne({
-      $or: [{ email }, { phone }],
+      $or: [
+        { email, otpVefication: 1 },
+        { phone, otpVefication: 1 },
+      ],
     });
 
-   
-if (isExists) {
-  if (isExists.email === email) {
-    return res.json({ message: "Email already registered", status: 0 });
-  }
-  if (isExists.phone === phone) {
-    return res.json({ message: "Phone number already registered", status: 0 });
-  }
-  return res.json({ message: "User already registered", status: 0 });
-}
+
+      if (isExists) {
+        if (isExists.email === email) {
+          return res.json({ message: "Email already registered", status: 0 });
+        }
+        if (isExists.phone === phone) {
+          return res.json({ message: "Phone number already registered", status: 0 });
+        }
+      } 
 
     const otp = 1234;
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
@@ -189,19 +191,30 @@ const OrgRegisterVerifyOtp = async (req, res) => {
       return res.json({ message: "OTP expired", status: 0 });
     }
 
-    if (user.otp !== otp) {
+    if (user.otp != otp) {
       return res.json({ message: "Invalid OTP", status: 0 });
     }
 
+    user.otpVefication = 1 
     user.otp = undefined;
     user.otpExpiry = undefined;
     await user.save();
+
+  // Remove Duplicates Data
+    await organizationModel.deleteMany({
+      _id: { $ne: user._id },
+      otpVefication: 0,
+      $or: [
+        { email: user.email },
+        { phone: user.phone }
+      ]
+    });
 
     return res.status(200).json({
       message: "OTP verified successfully",
       status: 1,
       data: {
-        id:user._id,
+        id: user._id,
         formCounter: user.formCounter,
         role: user.role,
       },

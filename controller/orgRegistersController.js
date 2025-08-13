@@ -1,7 +1,8 @@
 const organizationModel = require("../model/organizationModel");
 const uploadedLincenModel = require("../model/uploadedLincenModel");
 const manageMentModel = require("../model/manageMentModel");
- const accountModel = require("../model/bankDetailsModel");
+const accountModel = require("../model/bankDetailsModel");
+const aboutModel = require("../model/aboutModel");
 
 const createRegistration1 = async (req, res) => {
   try {
@@ -71,14 +72,11 @@ const createRegistration1 = async (req, res) => {
 
     // Check Existing Register Org
     const isExisting = await organizationModel.findOne({
-        $or:[
-            {registeredName:registeredName},
-            {fullAddress:fullAddress}
-        ]
-    })
+      $or: [{ registeredName: registeredName }, { fullAddress: fullAddress }],
+    });
 
-    if(isExisting){
-        return res.json({message:"User already registered "})
+    if (isExisting) {
+      return res.json({ message: "User already registered " });
     }
 
     // File validations
@@ -122,15 +120,11 @@ const createRegistration1 = async (req, res) => {
       status: 1,
     });
 
-   
-
-    return res
-    .status(200)
-      .json({
-        status: 1,
-        message: "Registered successfully",
-        data: newRegister,
-      });
+    return res.status(200).json({
+      status: 1,
+      message: "Registered successfully",
+      data: newRegister,
+    });
   } catch (error) {
     console.error("Error while registering:", error);
     return res
@@ -139,57 +133,62 @@ const createRegistration1 = async (req, res) => {
   }
 };
 
-
 const updateRegistration2 = async (req, res) => {
   try {
     const { id, fullname, email, phone, designation, type } = req.body;
 
-    if (!id) return res.json({ status: 0, message: "Organization ID is required" });
-    if (!fullname?.trim()) return res.json({ status: 0, message: "Fullname is required" });
-    if (!email?.trim()) return res.json({ status: 0, message: "Email is required" });
-    if (!phone?.trim()) return res.json({ status: 0, message: "Phone is required" });
-    if (!designation?.trim()) return res.json({ status: 0, message: "Designation is required" });
-    
+    if (!id)
+      return res.json({ status: 0, message: "Organization ID is required" });
+    if (!fullname?.trim())
+      return res.json({ status: 0, message: "Fullname is required" });
+    if (!email?.trim())
+      return res.json({ status: 0, message: "Email is required" });
+    if (!phone?.trim())
+      return res.json({ status: 0, message: "Phone is required" });
+    if (!designation?.trim())
+      return res.json({ status: 0, message: "Designation is required" });
 
-
-    const organization = await organizationModel.findById(id)
-    if (!organization) return res.json({ status: 0, message: "Organization ID not found" });
+    const organization = await organizationModel.findById(id);
+    if (!organization)
+      return res.json({ status: 0, message: "Organization ID not found" });
 
     // Check for duplicate email/phone only inside this org
     const existingManagement = await manageMentModel.findOne({
       _id: { $in: organization.managements },
-      $or: [{ email }, { phone }]
+      $or: [{ email }, { phone }],
     });
 
     if (existingManagement) {
-      return res.json({ status: 0, message: "Email or phone already registered in this organization" });
+      return res.json({
+        status: 0,
+        message: "Email or phone already registered in this organization",
+      });
     }
-
 
     if (type === 1) {
       const headExists = await manageMentModel.exists({
         _id: { $in: organization.managements },
-        type: 1
+        type: 1,
       });
       if (headExists) {
-        return res.json({ status: 0, message: "Head already exists in this organization" });
+        return res.json({
+          status: 0,
+          message: "Head already exists in this organization",
+        });
       }
     }
 
-  
     const newManagement = await manageMentModel.create({
       fullname,
       email,
       phone,
       designation,
-      type
+      type,
     });
 
-
-    await organizationModel.findByIdAndUpdate(
-      id,
-      { $addToSet: { managements: newManagement._id } }
-    );
+    await organizationModel.findByIdAndUpdate(id, {
+      $addToSet: { managements: newManagement._id },
+    });
 
     res.json({ status: 1, message: "Management added", data: newManagement });
   } catch (err) {
@@ -197,7 +196,6 @@ const updateRegistration2 = async (req, res) => {
     res.status(500).json({ status: 0, message: "Internal server error" });
   }
 };
-
 
 const updateRegistration3 = async (req, res) => {
   try {
@@ -208,21 +206,34 @@ const updateRegistration3 = async (req, res) => {
       ifsc,
       bankName,
       address,
-      accountType
+      accountType,
     } = req.body;
 
-    if (!id) return res.json({ status: 0, message: "Organization ID is required" });
-    if (!accountHolderName?.trim()) return res.json({ status: 0, message: "Account holder name is required" });
-    if (!accountNumber?.trim()) return res.json({ status: 0, message: "Account number is required" });
-    if (!ifsc?.trim()) return res.json({ status: 0, message: "IFSC code is required" });
-    if (!bankName?.trim()) return res.json({ status: 0, message: "Bank name is required" });
-    if (!address?.trim()) return res.json({ status: 0, message: "Address is required" });
-    if (!accountType) {
-      return res.json({ status: 0, message: "Invalid account type (0 for Normal A/C, 1 for FCRA A/C)" });
+    if (!id)
+      return res.json({ status: 0, message: "Organization ID is required" });
+    if (!accountHolderName?.trim())
+      return res.json({
+        status: 0,
+        message: "Account holder name is required",
+      });
+    if (!accountNumber?.trim())
+      return res.json({ status: 0, message: "Account number is required" });
+    if (!ifsc?.trim())
+      return res.json({ status: 0, message: "IFSC code is required" });
+    if (!bankName?.trim())
+      return res.json({ status: 0, message: "Bank name is required" });
+    if (!address?.trim())
+      return res.json({ status: 0, message: "Address is required" });
+    if (accountType !== 0 && accountType !== 1) {
+      return res.json({
+        status: 0,
+        message: "Invalid account type (0 for Normal A/C, 1 for FCRA A/C)",
+      });
     }
 
     const organization = await organizationModel.findById(id);
-    if (!organization) return res.json({ status: 0, message: "Organization ID not found" });
+    if (!organization)
+      return res.json({ status: 0, message: "Organization ID not found" });
 
     const accountTypeLabel = accountType === 0 ? "Normal A/C" : "FCRA A/C";
 
@@ -233,23 +244,147 @@ const updateRegistration3 = async (req, res) => {
       bankName,
       address,
       accountType,
-      accountTypeLabel
+      accountTypeLabel,
     });
 
     await organizationModel.findByIdAndUpdate(id, {
-      $addToSet: { accounts: newAccount._id }
+      $addToSet: { bankDetails: newAccount._id },
     });
 
     res.status(200).json({
       status: 1,
       message: "Account added successfully",
-      data: newAccount
+      data: newAccount,
     });
-
   } catch (err) {
-    console.error("Error in createRegistration3:", err);
+    console.error("Error in updateRegistration3:", err);
     res.status(500).json({ status: 0, message: "Internal server error" });
   }
 };
 
-module.exports = { createRegistration1,updateRegistration2,updateRegistration3 };
+const updateRegistration4 = async (req, res) => {
+  try {
+    const {
+      id,
+      registeredAddress,
+      googleLocation,
+      phoneNo1,
+      phoneNo2,
+      emailAddress1,
+      emailAddress2,
+      websiteURL,
+    } = req.body;
+
+    if (!id)
+      return res.json({ status: 0, message: "Organization ID is required" });
+    if (!registeredAddress?.trim()) {
+      return res.json({ status: 0, message: "registeredAddress is required" });
+    }
+
+    if (!registeredAddress?.trim()) {
+      return res.json({ status: 0, message: "registeredAddress is required" });
+    }
+    if (!googleLocation?.trim()) {
+      return res.json({ status: 0, message: "googleLocation is required" });
+    }
+
+    if (!phoneNo1?.trim()) {
+      return res.json({ status: 0, message: "phoneNo1 is required" });
+    }
+    if (!phoneNo2?.trim()) {
+      return res.json({ status: 0, message: "phoneNo2 is required" });
+    }
+
+    if (!emailAddress1?.trim()) {
+      return res.json({ status: 0, message: "emailAddress1 is required" });
+    }
+    if (!emailAddress2?.trim()) {
+      return res.json({ status: 0, message: "emailAddress2 is required" });
+    }
+    if (!emailAddress1?.trim()) {
+      return res.json({ status: 0, message: "emailAddress1 is required" });
+    }
+
+    if (!websiteURL?.trim()) {
+      return res.json({ status: 0, message: "websiteURL is required" });
+    }
+
+    const organization = await organizationModel.findById(id);
+    if (!organization)
+      return res.json({ status: 0, message: "Organization ID not found" });
+
+    const contact = await contactModel.create({
+      registeredAddress,
+      googleLocation,
+      phoneNo1,
+      phoneNo2,
+      emailAddress1,
+      emailAddress2,
+      websiteURL,
+    });
+
+    await organizationModel.findByIdAndUpdate(id, {
+      $addToSet: { contactDetails: contact._id },
+    });
+
+    res.status(200).json({
+      status: 1,
+      message: "Contact added successfully",
+      data: contact,
+    });
+  } catch (error) {
+    console.error("Error in updateRegistration4:", error);
+    res.status(500).json({ status: 0, message: "Internal server error" });
+  }
+};
+
+const updateRegistration5 = async (req, res) => {
+  try {
+    const { id, vision, coreActivities, otherActivities } = req.body;
+
+    if (!id)
+      return res.json({ status: 0, message: "Organization ID is required" });
+
+    if (!vision?.trim()) {
+      return res.json({ status: 0, message: "vision is required" });
+    }
+    if (!coreActivities?.trim()) {
+      return res.json({ status: 0, message: "coreActivities is required" });
+    }
+
+    if (!otherActivities?.trim()) {
+      return res.json({ status: 0, message: "otherActivities is required" });
+    }
+
+    const organization = await organizationModel.findById(id);
+    if (!organization)
+      return res.json({ status: 0, message: "Organization ID not found" });
+
+    const about = await aboutModel.create({
+      vision,
+      coreActivities,
+      otherActivities,
+    });
+
+    await organizationModel.findByIdAndUpdate(id, {
+      $addToSet: { aboutDetails: about._id },
+    });
+
+    res.status(200).json({
+      status: 1,
+      message: "Contact added successfully",
+      data: about,
+    });
+  } catch (error) {
+    console.error("Error in updateRegistration4:", error);
+    res.status(500).json({ status: 0, message: "Internal server error" });
+  }
+};
+
+module.exports = {
+  createRegistration1,
+  updateRegistration2,
+  updateRegistration3,
+  updateRegistration4,
+  updateRegistration5
+};

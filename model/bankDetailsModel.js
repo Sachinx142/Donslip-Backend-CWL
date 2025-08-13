@@ -9,7 +9,6 @@ const accountSchema = new mongoose.Schema({
   accountNumber: {
     type: String,
     default:null,
-    unique: true
   },
   ifsc: {
     type: String,
