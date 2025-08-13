@@ -136,13 +136,14 @@ const OrgRegister = async (req, res) => {
 
       if (isExists) {
         if (isExists.email === email) {
-          return res.json({ message: "Email already registered", status: 0 });
+          return res.json({ message: "Email already registered Please Login.", status: 0 });
         }
         if (isExists.phone === phone) {
-          return res.json({ message: "Phone number already registered", status: 0 });
+          return res.json({ message: "Phone number already registered Please Login.", status: 0 });
         }
       } 
-
+      
+    //  OTP Generate
     const otp = 1234;
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
@@ -152,6 +153,7 @@ const OrgRegister = async (req, res) => {
       phone,
       otp,
       otpExpiry,
+      status:1
     });
     user.otp = otp;
     user.otpExpiry = otpExpiry;
@@ -196,8 +198,8 @@ const OrgRegisterVerifyOtp = async (req, res) => {
     }
 
     user.otpVefication = 1 
-    user.otp = undefined;
-    user.otpExpiry = undefined;
+    user.otp = null;
+    user.otpExpiry = null;
     await user.save();
 
   // Remove Duplicates Data
