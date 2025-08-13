@@ -19,8 +19,8 @@ const organizationSchema = new mongoose.Schema(
       enum: ["email", "phone"],
       default: null,
     },
-    otp: { type: Number ,default:null},
-    otpExpiry: { type: Date ,default:null},
+    otp: { type: Number, default: null },
+    otpExpiry: { type: Date, default: null },
     status: {
       type: Number,
       default: null,
@@ -36,7 +36,7 @@ const organizationSchema = new mongoose.Schema(
       ref: "subCategoryModel",
       default: null,
     },
-    religionId: {
+    religionSubCategoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "religionSubCategoryModel",
       default: null,
@@ -56,8 +56,6 @@ const organizationSchema = new mongoose.Schema(
     pincode: { type: String, default: "" },
     fullAddress: { type: String, default: "" },
 
-    panNo: { type: String, default: "" },
-
     //Upload Licence & Approvals
     licenceApprovalId: {
       type: [mongoose.Schema.Types.ObjectId],
@@ -73,32 +71,88 @@ const organizationSchema = new mongoose.Schema(
     },
 
     // Bank Details
-    bankDetails: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "accountModel",
-      default: [],
+    accountHolderName: {
+      type: String,
+      default: null,
+    },
+    accountNumber: {
+      type: String,
+      default: null,
+    },
+    ifsc: {
+      type: String,
+      default: null,
+      uppercase: true,
+    },
+    bankName: {
+      type: String,
+      default: null,
+    },
+    address: {
+      type: String,
+      default: null,
+    },
+    //accountype means 0 for Normal A/c and 1 for FCRA A/c
+    accountType: {
+      type: Number,
+      default: 0,
     },
 
+    //accountTypeLabel means 0 for Normal A/c and 1 for FCRA A/c on the other hand Which Bank Type
+    accountTypeLabel: {
+      type: String,
+      default: 0,
+    },
     // Contact Details
-    contactDetails:{
-       type:[mongoose.Schema.Types.ObjectId],
-       ref:"contactModel",
-       default:[]
-    },
+      registeredAddress: {
+    type: String,
+    default: null,
+  },
+  googleLocation: {
+    type: String,
+    default: null,
+  },
+  phoneNo1:{
+        type: String,
+    default: null,
+  },
+  phoneNo2:{
+        type: String,
+    default: null,
+  },
+  emailAddress1:{
+        type: String,
+    default: null,
+  },
+  emailAddress2:{
+        type: String,
+    default: null,
+  },
+  websiteURL:{
+    type:String,
+    default:null
+  },
 
-    // About 
-    aboutDetails:{
-       type:[mongoose.Schema.Types.ObjectId],
-       ref:"aboutModel",
-       default:[]
-    },
+    // About
+   vision: {
+    type: String,
+    default: null,
+  },
+  coreActivities: {
+    type: String,
+    default: null,
+  },
+  otherActivities:{
+    type:String,
+    default:null
+  },
 
     //OTP Verification
-    otpVefication:{
-      type:Number,
-      default:0
+    otpVefication: {
+      type: Number,
+      default: 0,
     },
-    
+
     // 1 for Register and 0 for Unregister
     organiZationType: {
       type: Number,
@@ -118,6 +172,9 @@ const organizationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const organizationModel = mongoose.model("organizationModel", organizationSchema);
+const organizationModel = mongoose.model(
+  "organizationModel",
+  organizationSchema
+);
 
 module.exports = organizationModel;
